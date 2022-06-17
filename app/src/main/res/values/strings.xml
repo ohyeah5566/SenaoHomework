@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SenaoHW</string>
+    <string name="item_mart_id">商品標號：%1$s</string>
 </resources>
