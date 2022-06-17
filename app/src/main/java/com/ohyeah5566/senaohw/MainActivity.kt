@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -15,29 +16,41 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
-        binding.recyclerView.adapter = MartAdapter(listOf(
-            Mart(martName = "iPhone 12 Pro Max 256GB【下殺97折 送保護貼兌換券】", finalPrice = 39950, imageUrl = "https://pdinfo.senao.com.tw/octopus/contents/99b404a6bcfb4a74a27e4a10746fb258.jpg"),
-            Mart(martName = "iPhone 12 Pro Max 256GB【下殺97折 送保護貼兌換券】", finalPrice = 39950, imageUrl = "https://pdinfo.senao.com.tw/octopus/contents/99b404a6bcfb4a74a27e4a10746fb258.jpg"),
-            Mart(martName = "iPhone 12 Pro Max 256GB【下殺97折 送保護貼兌換券】", finalPrice = 39950, imageUrl = "https://pdinfo.senao.com.tw/octopus/contents/99b404a6bcfb4a74a27e4a10746fb258.jpg"),
-            Mart(martName = "iPhone 12 Pro Max 256GB【下殺97折 送保護貼兌換券】", finalPrice = 39950, imageUrl = "https://pdinfo.senao.com.tw/octopus/contents/99b404a6bcfb4a74a27e4a10746fb258.jpg"),
-            Mart(martName = "iPhone 12 Pro Max 256GB【下殺97折 送保護貼兌換券】", finalPrice = 39950, imageUrl = "https://pdinfo.senao.com.tw/octopus/contents/99b404a6bcfb4a74a27e4a10746fb258.jpg")
-        )){
+    private val adapter by lazy {
+        MartAdapter {
             val intent = Intent(this, MartDetailActivity::class.java)
             intent.putExtra(MartDetailActivity.INTENT_KEY_MART, it)
             startActivity(intent)
         }
     }
+
+    private val viewModel by viewModels<MartViewModel> {
+        MartViewModelProvider(MartRepositoryRemote(getServiceInstance()))
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
+        binding.recyclerView.adapter = adapter
+
+        viewModel.liveData.observe(this) {
+            adapter.submitNewList(it)
+        }
+        viewModel.loadOne()
+    }
 }
 
 class MartAdapter(
-    private val list: List<Mart>,
     private inline val itemClickEvent: (mart: Mart) -> Unit
 ) : RecyclerView.Adapter<MartAdapter.ViewHolder>() {
+
+    private var list: List<Mart> = emptyList()
+    fun submitNewList(list: List<Mart>) {
+        this.list = list
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -50,7 +63,7 @@ class MartAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.onBind(list[position],)
+        holder.onBind(list[position])
     }
 
     override fun getItemCount(): Int {

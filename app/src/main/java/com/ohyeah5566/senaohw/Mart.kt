@@ -1,9 +1,11 @@
 package com.ohyeah5566.senaohw
 
 import android.os.Parcelable
+import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
 import java.text.NumberFormat
 
+@JsonClass(generateAdapter = true)
 @Parcelize
 data class Mart(
     val martId: String = "",
