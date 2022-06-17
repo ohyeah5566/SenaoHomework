@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imv"
+        android:layout_width="120dp"
+        android:layout_height="160dp"
+        android:layout_marginVertical="10dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mart_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:lines="2"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/final_price_tv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imv"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="便宜Iphone" />
+
+    <TextView
+        android:id="@+id/final_price_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:lines="2"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imv"
+        app:layout_constraintTop_toBottomOf="@id/mart_name_tv"
+        tools:text="$29,500" />
+
+    <ImageView
+        android:id="@+id/like_imv"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="5dp"
+        android:padding="5dp"
+        android:src="@drawable/favorite_48px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/add_to_cart_imv" />
+
+    <ImageView
+        android:id="@+id/add_to_cart_imv"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="10dp"
+        android:padding="5dp"
+        android:src="@drawable/shopping_cart_48px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
