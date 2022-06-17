@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -31,9 +33,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
         binding.recyclerView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         binding.recyclerView.adapter = adapter
+
+        binding.searchBar.searchEditText.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                Toast.makeText(this, "TODO search:${textView.text}", Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
 
         viewModel.liveData.observe(this) {
             adapter.submitNewList(it)
