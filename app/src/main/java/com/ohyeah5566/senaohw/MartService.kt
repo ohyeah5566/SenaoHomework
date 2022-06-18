@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 
+//因為Api result有用data包起來 所以這邊也用BaseResponse
 @JsonClass(generateAdapter = true)
 data class BaseResponse<T>(
     val data: T

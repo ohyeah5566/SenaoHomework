@@ -8,15 +8,13 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.launch
 
 class MartViewModel(
-    val repository: MartRepository
+    private val repository: MartRepository
 ) : ViewModel() {
     var key = ""
 
     @OptIn(ExperimentalPagingApi::class)
     val flow = Pager(
-        PagingConfig(
-            20
-        ),
+        PagingConfig(20),
         remoteMediator = MartRemoteMediator(repository),
     ) {
         repository.searchMartPagingSource(key)
