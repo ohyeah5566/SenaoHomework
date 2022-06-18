@@ -1,25 +1,33 @@
 package com.ohyeah5566.senaohw
 
 import androidx.lifecycle.*
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import kotlinx.coroutines.launch
 
 class MartViewModel(
-    private val repository: MartRepository
+    val repository: MartRepository
 ) : ViewModel() {
-    private val _liveData: MutableLiveData<List<Mart>> = MutableLiveData()
-    val liveData: LiveData<List<Mart>> = _liveData
+    var key = ""
 
-    fun loadOne() {
+    @OptIn(ExperimentalPagingApi::class)
+    val flow = Pager(
+        PagingConfig(
+            20
+        ),
+        remoteMediator = MartRemoteMediator(repository),
+    ) {
+        repository.searchMartPagingSource(key)
+    }.flow.cachedIn(viewModelScope)
+
+    fun clearAll(){
         viewModelScope.launch {
-            _liveData.value = repository.loadList()
+            repository.clearAll()
         }
     }
 
-    fun search(keyword:String) {
-        viewModelScope.launch {
-            _liveData.value = repository.loadListWithKeyword(keyword)
-        }
-    }
 }
 
 class MartViewModelProvider(

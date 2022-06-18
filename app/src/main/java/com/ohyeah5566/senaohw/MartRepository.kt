@@ -1,31 +1,49 @@
 package com.ohyeah5566.senaohw
 
-interface MartRepository {
-    suspend fun loadList(): List<Mart>
+import android.util.Log
+import androidx.paging.*
 
-    suspend fun loadListWithKeyword(keyword: String): List<Mart>
+interface MartRepository : Remote, MartDao
+
+interface Remote {
+    suspend fun fetchRemoteMart(): List<Mart>
 }
 
-class MartRepositoryRemote(
+class MartRepositoryImp(
     private val service: MartService,
-    private val localMartDao: MartDao
-) : MartRepository {
-    override suspend fun loadList(): List<Mart> {
-        val list = loadListWithKeyword("")
-        if (list.isNotEmpty()) return list
-        return fetchData()
+    localMartDao: AppDatabase
+) : MartRepository, MartDao by MartDao_Impl(localMartDao) {
+    override suspend fun fetchRemoteMart(): List<Mart> {
+        return try {
+            service.getMartList().data
+        } catch (ex:Exception){
+            emptyList()
+        }
     }
+}
 
-    private suspend fun fetchData(): List<Mart> {
-        val list = service.getMartList().data
-        localMartDao.clearALl()
-        localMartDao.insertAll(list)
-        return localMartDao.getAllMart()
+@OptIn(ExperimentalPagingApi::class)
+class MartRemoteMediator(
+    private val repository: MartRepository
+) : RemoteMediator<Int, Mart>() {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, Mart>): MediatorResult {
+        Log.d("", "Remote,${loadType}")
+        return when (loadType) {
+            LoadType.APPEND -> {
+                val list = repository.fetchRemoteMart()
+                repository.insertAll(list)
+                if (list.size < 20) {
+                    MediatorResult.Success(true)
+                } else {
+                    MediatorResult.Success(false)
+                }
+            }
+            LoadType.REFRESH -> {
+                MediatorResult.Success(false)
+            }
+            LoadType.PREPEND -> {
+                MediatorResult.Success(true)
+            }
+        }
     }
-
-    override suspend fun loadListWithKeyword(keyword: String): List<Mart> {
-        return localMartDao.searchMart("%${keyword}%")
-    }
-
-
 }

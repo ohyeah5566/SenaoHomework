@@ -8,8 +8,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -29,7 +31,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val viewModel by viewModels<MartViewModel> {
-        MartViewModelProvider(MartRepositoryRemote(getServiceInstance(),getDb(applicationContext).martDao()))
+        MartViewModelProvider(
+            MartRepositoryImp(
+                getServiceInstance(),
+                getDb(applicationContext)
+            )
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,19 +46,25 @@ class MainActivity : AppCompatActivity() {
 
         binding.recyclerView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         binding.recyclerView.adapter = adapter
-
         binding.searchBar.searchEditText.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                viewModel.search(textView.text.toString())
+                viewModel.key = textView.text.toString()
+                adapter.refresh()
                 hideKeyboard()
             }
             true
         }
-
-        viewModel.liveData.observe(this) {
-            adapter.submitNewList(it)
+        binding.refreshLayout.setOnRefreshListener {
+            viewModel.clearAll()
+            adapter.refresh()
         }
-        viewModel.loadOne()
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.flow.collect {
+                binding.refreshLayout.isRefreshing = false
+                adapter.submitData(it)
+            }
+        }
     }
 
     private fun hideKeyboard() {
@@ -64,13 +77,15 @@ class MainActivity : AppCompatActivity() {
 
 class MartAdapter(
     private inline val itemClickEvent: (mart: Mart) -> Unit
-) : RecyclerView.Adapter<MartAdapter.ViewHolder>() {
-
-    private var list: List<Mart> = emptyList()
-    fun submitNewList(list: List<Mart>) {
-        this.list = list
-        notifyDataSetChanged()
+) : PagingDataAdapter<Mart, MartAdapter.ViewHolder>(object : DiffUtil.ItemCallback<Mart>() {
+    override fun areItemsTheSame(oldItem: Mart, newItem: Mart): Boolean {
+        return oldItem.martId == newItem.martId
     }
+
+    override fun areContentsTheSame(oldItem: Mart, newItem: Mart): Boolean {
+        return oldItem == newItem
+    }
+}) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -83,25 +98,21 @@ class MartAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.onBind(list[position])
-    }
-
-    override fun getItemCount(): Int {
-        return list.size
+        holder.onBind(getItem(position))
     }
 
     inner class ViewHolder(
-        val binding: ItemMartBinding
+        private val binding: ItemMartBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        fun onBind(mart: Mart) {
-            binding.imv.load(mart.imageUrl)
-            binding.martNameTv.text = mart.martName
-            binding.finalPriceTv.text = mart.getFinalPriceText()
-            binding.root.setOnClickListener {
-                itemClickEvent.invoke(mart)
+        fun onBind(mart: Mart?) {
+            mart?.let {
+                binding.imv.load(mart.imageUrl)
+                binding.martNameTv.text = mart.martName
+                binding.finalPriceTv.text = mart.getFinalPriceText()
+                binding.root.setOnClickListener {
+                    itemClickEvent.invoke(mart)
+                }
             }
         }
     }
-
-
 }
