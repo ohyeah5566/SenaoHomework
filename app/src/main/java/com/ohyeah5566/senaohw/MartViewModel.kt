@@ -14,6 +14,12 @@ class MartViewModel(
             _liveData.value = repository.loadList()
         }
     }
+
+    fun search(keyword:String) {
+        viewModelScope.launch {
+            _liveData.value = repository.loadListWithKeyword(keyword)
+        }
+    }
 }
 
 class MartViewModelProvider(

@@ -1,11 +1,13 @@
 package com.ohyeah5566.senaohw
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val viewModel by viewModels<MartViewModel> {
-        MartViewModelProvider(MartRepositoryRemote(getServiceInstance()))
+        MartViewModelProvider(MartRepositoryRemote(getServiceInstance(),getDb(applicationContext).martDao()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +42,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.searchBar.searchEditText.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                Toast.makeText(this, "TODO search:${textView.text}", Toast.LENGTH_SHORT).show()
+                viewModel.search(textView.text.toString())
+                hideKeyboard()
             }
             true
         }
@@ -49,6 +52,13 @@ class MainActivity : AppCompatActivity() {
             adapter.submitNewList(it)
         }
         viewModel.loadOne()
+    }
+
+    private fun hideKeyboard() {
+        this.currentFocus?.let { view ->
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 }
 
