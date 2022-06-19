@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/mart_list_fragment">
+
+    <fragment
+        android:id="@+id/mart_list_fragment"
+        android:name="com.ohyeah5566.senaohw.MartListFragment">
+        <action
+            android:id="@+id/goto_mart_detail_fragment"
+            app:destination="@id/mart_detail_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mart_detail_fragment"
+        android:name="com.ohyeah5566.senaohw.MartDetailFragment" />
+
+</navigation>

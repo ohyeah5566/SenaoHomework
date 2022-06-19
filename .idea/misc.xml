@@ -7,6 +7,8 @@
         <entry key="app/src/main/res/layout/actionbar_search.xml" value="0.335" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.24010416666666667" />
         <entry key="app/src/main/res/layout/activity_mart_detail.xml" value="0.25729166666666664" />
+        <entry key="app/src/main/res/layout/fragment_mart_detail.xml" value="0.25625" />
+        <entry key="app/src/main/res/layout/fragment_mart_list.xml" value="0.25625" />
         <entry key="app/src/main/res/layout/item_mart.xml" value="0.25625" />
       </map>
     </option>

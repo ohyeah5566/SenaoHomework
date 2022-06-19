@@ -20,12 +20,18 @@ class MartViewModel(
         repository.searchMartPagingSource(key)
     }.flow.cachedIn(viewModelScope)
 
-    fun clearAll(){
+    fun clearAll() {
         viewModelScope.launch {
             repository.clearAll()
         }
     }
 
+    private val _martDetail = MutableLiveData<Mart>()
+    val martDetail: LiveData<Mart> = _martDetail
+
+    fun setMartDetail(mart: Mart) {
+        _martDetail.value = mart
+    }
 }
 
 class MartViewModelProvider(
