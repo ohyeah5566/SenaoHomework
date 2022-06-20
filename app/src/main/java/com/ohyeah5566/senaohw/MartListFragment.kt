@@ -79,10 +79,13 @@ class MartListFragment : Fragment() {
 
         lifecycleScope.launchWhenResumed {
             viewModel.flow.collect {
-                binding.refreshLayout.isRefreshing = false
                 adapter.submitData(it)
             }
         }
+        adapterErrorHandle()
+        adapterLoadingHandle()
+    }
+    private fun adapterErrorHandle(){
         lifecycleScope.launchWhenResumed {
             adapter.loadStateFlow.distinctUntilChangedBy { //避免刷新時再次show出error
                 (it.mediator?.append as? LoadState.Error)?.error
@@ -94,6 +97,15 @@ class MartListFragment : Fragment() {
                     .show()
             }
         }
+    }
+    private fun adapterLoadingHandle(){
+        lifecycleScope.launchWhenResumed {
+            adapter.loadStateFlow.distinctUntilChangedBy{ it.refresh }
+                .collect {
+                    binding.refreshLayout.isRefreshing = it.refresh is LoadState.Loading
+                }
+        }
+
     }
 }
 
