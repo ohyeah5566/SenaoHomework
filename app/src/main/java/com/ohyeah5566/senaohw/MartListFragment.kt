@@ -1,13 +1,11 @@
 package com.ohyeah5566.senaohw
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,9 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.ohyeah5566.senaohw.databinding.FragmentMartListBinding
 import com.ohyeah5566.senaohw.databinding.ItemMartBinding
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 
 class MartListFragment : Fragment() {
 
@@ -42,7 +38,7 @@ class MartListFragment : Fragment() {
         MartViewModelProvider(
             MartRepositoryImp(
                 getServiceInstance(),
-                getDb(requireActivity().applicationContext)
+                MartDatabase.getDb(requireActivity().applicationContext)
             )
         )
     }
@@ -86,16 +82,18 @@ class MartListFragment : Fragment() {
         adapterErrorHandle()
         adapterLoadingHandle()
     }
-    private fun adapterErrorHandle(){
+
+    private fun adapterErrorHandle() {
         lifecycleScope.launchWhenResumed {
             adapter.loadStateFlow.collectError {
                 Toast.makeText(requireContext(), it.customMessage(), Toast.LENGTH_SHORT).show()
             }
         }
     }
-    private fun adapterLoadingHandle(){
+
+    private fun adapterLoadingHandle() {
         lifecycleScope.launchWhenResumed {
-            adapter.loadStateFlow.distinctUntilChangedBy{ it.refresh }
+            adapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
                 .collect {
                     binding.refreshLayout.isRefreshing = it.refresh is LoadState.Loading
                 }

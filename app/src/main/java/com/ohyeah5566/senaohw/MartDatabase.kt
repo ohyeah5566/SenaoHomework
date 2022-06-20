@@ -28,10 +28,20 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun martDao(): MartDao
 }
 
-fun getDb(context: Context): AppDatabase {
-    return Room.databaseBuilder(
-        context,
-        AppDatabase::class.java,
-        "senao_mart_db"
-    ).build()
+class MartDatabase {
+    companion object {
+        var INSTANCE: AppDatabase? = null
+
+        fun getDb(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context,
+                    AppDatabase::class.java,
+                    "senao_mart_db"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
 }
