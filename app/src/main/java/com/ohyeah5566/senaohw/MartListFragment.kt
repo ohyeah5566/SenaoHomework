@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -87,14 +88,8 @@ class MartListFragment : Fragment() {
     }
     private fun adapterErrorHandle(){
         lifecycleScope.launchWhenResumed {
-            adapter.loadStateFlow.distinctUntilChangedBy { //避免刷新時再次show出error
-                (it.mediator?.append as? LoadState.Error)?.error
-            }.filter {
-                it.mediator?.append is LoadState.Error
-            }.collect {
-                val error = (it.mediator?.append as LoadState.Error).error
-                Toast.makeText(requireContext(), error.customMessage(), Toast.LENGTH_SHORT)
-                    .show()
+            adapter.loadStateFlow.collectError {
+                Toast.makeText(requireContext(), it.customMessage(), Toast.LENGTH_SHORT).show()
             }
         }
     }
