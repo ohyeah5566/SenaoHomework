@@ -1,14 +1,17 @@
 package com.ohyeah5566.senaohw
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,6 +19,9 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.ohyeah5566.senaohw.databinding.FragmentMartListBinding
 import com.ohyeah5566.senaohw.databinding.ItemMartBinding
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 
 class MartListFragment : Fragment() {
 
@@ -71,14 +77,24 @@ class MartListFragment : Fragment() {
             adapter.refresh()
         }
 
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenResumed {
             viewModel.flow.collect {
                 binding.refreshLayout.isRefreshing = false
                 adapter.submitData(it)
             }
         }
+        lifecycleScope.launchWhenResumed {
+            adapter.loadStateFlow.distinctUntilChangedBy { //避免刷新時再次show出error
+                (it.mediator?.append as? LoadState.Error)?.error
+            }.filter {
+                it.mediator?.append is LoadState.Error
+            }.collect {
+                val error = (it.mediator?.append as LoadState.Error).error
+                Toast.makeText(requireContext(), error.customMessage(), Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
     }
-
 }
 
 class MartAdapter(

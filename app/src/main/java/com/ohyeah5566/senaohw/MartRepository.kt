@@ -2,6 +2,7 @@ package com.ohyeah5566.senaohw
 
 import android.util.Log
 import androidx.paging.*
+import okio.IOException
 
 interface MartRepository : Remote, MartDao
 
@@ -16,11 +17,7 @@ class MartRepositoryImp(
     MartDao by MartDao_Impl(localMartDao) //將MartDao的實作 委派給自動產出的MartDao_Impl, 沒編譯前MartDao_Impl會顯示紅字
 {
     override suspend fun fetchRemoteMart(): List<Mart> {
-        return try {
-            service.getMartList().data
-        } catch (ex: Exception) {
-            emptyList()
-        }
+        return service.getMartList().data
     }
 }
 
@@ -35,13 +32,17 @@ class MartRemoteMediator(
         Log.d("", "Remote,${loadType}")
         return when (loadType) {
             LoadType.APPEND -> {
-                val list = repository.fetchRemoteMart()
-                repository.insertAll(list)
-                //這邊假設一次回傳pageSize筆資料如果小於pageSize筆 表示沒更多資料了
-                if (list.size < state.config.pageSize) {
-                    MediatorResult.Success(true)
-                } else {
-                    MediatorResult.Success(false)
+                try {
+                    val list = repository.fetchRemoteMart()
+                    repository.insertAll(list)
+                    //這邊假設一次回傳pageSize筆資料如果小於pageSize筆 表示沒更多資料了
+                    if (list.size < state.config.pageSize) {
+                        MediatorResult.Success(true)
+                    } else {
+                        MediatorResult.Success(false)
+                    }
+                } catch (ex: Exception) {
+                    MediatorResult.Error(ex)
                 }
             }
             //refresh跟prepend這次的作業用不到就return
