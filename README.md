@@ -1,5 +1,7 @@
 # SenaoHomework
 
+[apk](https://github.com/ohyeah5566/SenaoHomework/blob/main/senao_ohyeah5566.apk)
+
 ### 需求：
 Call Api取得 商品列表 __需要儲存資料__ 再顯示到List<br/>
 點擊 item 前往商品詳細頁<br/>
@@ -17,3 +19,5 @@ MVVM 相關套件<br/><br/>
 下拉可以刷新list，有在刷新前清空db的資料<br/>
 搜尋的功能，輸入完後按下鍵盤的搜尋，search才會執行
 
+<img src="https://github.com/ohyeah5566/SenaoHomework/blob/main/images/senaogif.gif" width="400">
+<img src="https://github.com/ohyeah5566/SenaoHomework/blob/main/images/list.png" width="360"><img src="https://github.com/ohyeah5566/SenaoHomework/blob/main/images/detail.png" width="360">
