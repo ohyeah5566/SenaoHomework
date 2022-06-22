@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -63,11 +66,16 @@ class MartListFragment : Fragment() {
         binding.recyclerView.adapter = adapter
         binding.searchBar.searchEditText.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                viewModel.key = textView.text.toString()
-                adapter.refresh()
-                (requireActivity() as MainActivity).hideKeyboard()
+                startSearch(textView.text.toString())
             }
             true
+        }
+        binding.searchBar.searchEditText.doAfterTextChanged {
+            binding.searchBar.clearText.isVisible = it?.isEmpty() == false
+        }
+        binding.searchBar.clearText.setOnClickListener {
+            binding.searchBar.searchEditText.setText("")
+            startSearch("")
         }
         binding.refreshLayout.setOnRefreshListener {
             viewModel.clearAll()
@@ -81,6 +89,12 @@ class MartListFragment : Fragment() {
         }
         adapterErrorHandle()
         adapterLoadingHandle()
+    }
+
+    private fun startSearch(key: String) {
+        viewModel.key = key
+        adapter.refresh()
+        (requireActivity() as MainActivity).hideKeyboard()
     }
 
     private fun adapterErrorHandle() {
